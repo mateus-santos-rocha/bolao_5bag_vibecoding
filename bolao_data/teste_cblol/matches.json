@@ -1,0 +1,26 @@
+[
+    {
+        "id": 1,
+        "team1": "Vivo Keyd Stars",
+        "team2": "Isurus Estral",
+        "format": "MD5",
+        "datetime_iso": "2025-06-07T13:00:00",
+        "group": "Eliminatórias",
+        "status": "Agendada",
+        "result_team1_score": null,
+        "result_team2_score": null,
+        "winning_team": null
+    },
+    {
+        "id": 2,
+        "team1": "Furia",
+        "team2": "Pain Gaming",
+        "format": "MD5",
+        "datetime_iso": "2025-06-08T13:00:00",
+        "group": "Eliminatórias",
+        "status": "Agendada",
+        "result_team1_score": null,
+        "result_team2_score": null,
+        "winning_team": null
+    }
+]
