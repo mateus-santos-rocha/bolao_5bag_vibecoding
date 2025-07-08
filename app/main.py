@@ -401,5 +401,9 @@ def debug_limpar_tabelas(db: Session = Depends(get_db)):
     # Remove tabelas duplicadas
     for tabela in tabelas_duplicadas:
         db.execute(text(f'DROP TABLE IF EXISTS {tabela} CASCADE;'))
+    # Garante usuário admin padrão
+    from .models import User
+    admin = User(name="admin", is_admin=True)
+    db.add(admin)
     db.commit()
-    return {"status": "ok", "msg": "Tabelas duplicadas removidas e dados limpos."}
+    return {"status": "ok", "msg": "Tabelas duplicadas removidas, dados limpos e admin recriado."}
