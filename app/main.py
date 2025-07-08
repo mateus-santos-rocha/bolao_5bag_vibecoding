@@ -205,7 +205,12 @@ def bet(user_name: str = Form(...), match_id: int = Form(...), prediction: str =
         if datetime.now() > match.scheduled_time:
             crud.create_bet_request(db, user.id, match_id, prediction)
             return RedirectResponse(f"/matches?user_name={user_name}", status_code=303)
-        crud.place_bet(db, user.id, match_id, prediction)
+        # Verifica se já existe aposta para este usuário e partida
+        existing_bet = db.query(models.Bet).filter_by(user_id=user.id, match_id=match_id).first()
+        if existing_bet:
+            crud.update_bet(db, user.id, match_id, prediction)
+        else:
+            crud.place_bet(db, user.id, match_id, prediction)
         return RedirectResponse(f"/matches?user_name={user_name}", status_code=303)
     except Exception as e:
         # Renderiza a tela de apostas com erro
