@@ -290,6 +290,35 @@ def admin_delete_user(user_id: int = Form(...), db: Session = Depends(get_db)):
     crud.delete_user(db, user_id)
     return RedirectResponse("/admin", status_code=303)
 
+@app.post("/admin/team")
+def admin_add_team(team_name: str = Form(...), db: Session = Depends(get_db)):
+    if team_name:
+        team = crud.create_team(db, team_name)
+        if not team:
+            return RedirectResponse("/admin?error=duplicated_team", status_code=303)
+    return RedirectResponse("/admin", status_code=303)
+
+@app.post("/admin/team/edit")
+def admin_edit_team(team_id: int = Form(...), new_name: str = Form(...), db: Session = Depends(get_db)):
+    team = db.query(models.Team).get(team_id)
+    if not team:
+        return RedirectResponse("/admin?error=team_not_found", status_code=303)
+    # Verifica duplicidade
+    if db.query(models.Team).filter(models.Team.name == new_name, models.Team.id != team_id).first():
+        return RedirectResponse("/admin?error=duplicated_team", status_code=303)
+    team.name = new_name
+    db.commit()
+    db.refresh(team)
+    return RedirectResponse("/admin", status_code=303)
+
+@app.post("/admin/team/delete")
+def admin_delete_team(team_id: int = Form(...), db: Session = Depends(get_db)):
+    team = db.query(models.Team).get(team_id)
+    if team:
+        db.delete(team)
+        db.commit()
+    return RedirectResponse("/admin", status_code=303)
+
 @app.get("/admin/login", response_class=HTMLResponse)
 def admin_login_get(request: Request):
     return templates.TemplateResponse("admin_login.html", {"request": request})
