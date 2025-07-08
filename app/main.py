@@ -385,3 +385,21 @@ def debug_list_tables(db: Session = Depends(get_db)):
     result = db.execute(text("SELECT table_name FROM information_schema.tables WHERE table_schema = 'public';"))
     tables = [row[0] for row in result]
     return {"tables": tables}
+
+@app.get("/debug/limpar_tabelas")
+def debug_limpar_tabelas(db: Session = Depends(get_db)):
+    # Apaga tabelas duplicadas e dados de todas as tabelas
+    tabelas_duplicadas = [
+        'usuarios', 'apostas', 'partidas', 'times', 'parametros', 'scoring_rules', 'late_bet_requests'
+    ]
+    tabelas_principais = [
+        'bet_requests', 'bets', 'matches', 'teams', 'users'
+    ]
+    # Apaga dados das tabelas principais
+    for tabela in tabelas_principais:
+        db.execute(text(f'TRUNCATE TABLE {tabela} RESTART IDENTITY CASCADE;'))
+    # Remove tabelas duplicadas
+    for tabela in tabelas_duplicadas:
+        db.execute(text(f'DROP TABLE IF EXISTS {tabela} CASCADE;'))
+    db.commit()
+    return {"status": "ok", "msg": "Tabelas duplicadas removidas e dados limpos."}
