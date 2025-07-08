@@ -63,7 +63,10 @@ def matches(request: Request, db: Session = Depends(get_db), user_name: str = No
     # Serializa apostas incluindo o nome do usuário
     bets_serialized = []
     user_id_map = {u.id: u.name for u in users}
-    for b in bets:
+    # Filtra apostas apenas do usuário selecionado
+    user = next((u for u in users if u.name == user_name), None)
+    user_bets = [b for b in bets if user and b.user_id == user.id]
+    for b in user_bets:
         bets_serialized.append({
             'user_id': b.user_id,
             'user_name': user_id_map.get(b.user_id, ''),
