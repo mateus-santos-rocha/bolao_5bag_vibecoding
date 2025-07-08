@@ -42,8 +42,8 @@ def delete_user(db: Session, user_id: int):
 def get_matches(db: Session):
     return db.query(models.Match).all()
 
-def create_match(db: Session, team1, team2, scheduled_time, match_type):
-    match = models.Match(team1=team1, team2=team2, scheduled_time=scheduled_time, match_type=match_type)
+def create_match(db: Session, team1, team2, scheduled_time, match_type, phase_id=None):
+    match = models.Match(team1=team1, team2=team2, scheduled_time=scheduled_time, match_type=match_type, phase_id=phase_id)
     db.add(match)
     db.commit()
     db.refresh(match)
@@ -78,7 +78,7 @@ def approve_bet_request(db: Session, req_id, approve: bool):
     return req
 
 def get_ranking(db: Session, points_func):
-    users = db.query(models.User).all()
+    users = db.query(models.User).filter(models.User.is_admin == False).all()
     matches = db.query(models.Match).all()
     bets = db.query(models.Bet).filter(models.Bet.approved == True).all()
     ranking = {}
@@ -90,6 +90,39 @@ def get_ranking(db: Session, points_func):
                 score += points_func(match.match_type.value, bet.prediction, match.result)
         ranking[user.name] = score
     return sorted(ranking.items(), key=lambda x: x[1], reverse=True)
+
+# CRUD de fases
+
+def get_phases(db: Session):
+    return db.query(models.Phase).all()
+
+def create_phase(db: Session, name: str):
+    if db.query(models.Phase).filter(models.Phase.name == name).first():
+        return None
+    phase = models.Phase(name=name)
+    db.add(phase)
+    db.commit()
+    db.refresh(phase)
+    return phase
+
+def update_phase(db: Session, phase_id: int, new_name: str):
+    phase = db.query(models.Phase).get(phase_id)
+    if not phase:
+        return None
+    if db.query(models.Phase).filter(models.Phase.name == new_name, models.Phase.id != phase_id).first():
+        return None
+    phase.name = new_name
+    db.commit()
+    db.refresh(phase)
+    return phase
+
+def delete_phase(db: Session, phase_id: int):
+    phase = db.query(models.Phase).get(phase_id)
+    if phase:
+        db.delete(phase)
+        db.commit()
+        return True
+    return False
 
 def get_teams(db: Session):
     return db.query(models.Team).all()

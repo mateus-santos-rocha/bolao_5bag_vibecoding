@@ -74,6 +74,14 @@
     </ul>
     <h2>Criar nova partida</h2>
     <form method="post" action="/admin/match">
+        <label>Fase:
+            <select name="phase_id" required>
+                <option value="">Selecione</option>
+                {% for phase in phases %}
+                <option value="{{ phase.id }}">{{ phase.name }}</option>
+                {% endfor %}
+            </select>
+        </label><br>
         <label>Time 1:
             <select name="team1" required>
                 <option value="">Selecione</option>

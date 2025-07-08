@@ -244,23 +244,25 @@ def admin(request: Request, db: Session = Depends(get_db)):
     matches = crud.get_matches(db)
     users = crud.get_all_users(db)
     teams = crud.get_teams(db)
+    phases = crud.get_phases(db)
     # Formata a data/hora das partidas para o padrão brasileiro
     for match in matches:
         match.scheduled_time_fmt = match.scheduled_time.strftime('%d/%m/%Y %H:%M:%S') if match.scheduled_time else ''
-    return templates.TemplateResponse("admin.html", {"request": request, "matches": matches, "points": POINTS, "users": users, "teams": teams})
+    return templates.TemplateResponse("admin.html", {"request": request, "matches": matches, "points": POINTS, "users": users, "teams": teams, "phases": phases})
 
 @app.post("/admin/match")
-def admin_create_match(request: Request, team1: str = Form(...), team2: str = Form(...), scheduled_time: str = Form(...), match_type: str = Form(...), db: Session = Depends(get_db)):
+def admin_create_match(request: Request, team1: str = Form(...), team2: str = Form(...), scheduled_time: str = Form(...), match_type: str = Form(...), phase_id: int = Form(...), db: Session = Depends(get_db)):
     try:
         dt = datetime.strptime(scheduled_time, "%d/%m/%Y %H:%M:%S")
     except ValueError:
         matches = crud.get_matches(db)
         users = crud.get_all_users(db)
         teams = crud.get_teams(db)
+        phases = crud.get_phases(db)
         for match in matches:
             match.scheduled_time_fmt = match.scheduled_time.strftime('%d/%m/%Y %H:%M:%S') if match.scheduled_time else ''
-        return templates.TemplateResponse("admin.html", {"request": request, "matches": matches, "points": POINTS, "users": users, "teams": teams, "error": "Data/hora inválida. Use o formato dd/mm/aaaa HH:MM:SS"})
-    crud.create_match(db, team1, team2, dt, MatchType(match_type))
+        return templates.TemplateResponse("admin.html", {"request": request, "matches": matches, "points": POINTS, "users": users, "teams": teams, "phases": phases, "error": "Data/hora inválida. Use o formato dd/mm/aaaa HH:MM:SS"})
+    crud.create_match(db, team1, team2, dt, MatchType(match_type), phase_id)
     return RedirectResponse("/admin", status_code=303)
 
 @app.post("/admin/result")
@@ -326,6 +328,26 @@ def admin_delete_team(team_id: int = Form(...), db: Session = Depends(get_db)):
     if team:
         db.delete(team)
         db.commit()
+    return RedirectResponse("/admin", status_code=303)
+
+@app.post("/admin/phase")
+def admin_create_phase(phase_name: str = Form(...), db: Session = Depends(get_db)):
+    if phase_name:
+        phase = crud.create_phase(db, phase_name)
+        if not phase:
+            return RedirectResponse("/admin?error=duplicated_phase", status_code=303)
+    return RedirectResponse("/admin", status_code=303)
+
+@app.post("/admin/phase/edit")
+def admin_edit_phase(phase_id: int = Form(...), new_name: str = Form(...), db: Session = Depends(get_db)):
+    phase = crud.update_phase(db, phase_id, new_name)
+    if not phase:
+        return RedirectResponse("/admin?error=duplicated_phase", status_code=303)
+    return RedirectResponse("/admin", status_code=303)
+
+@app.post("/admin/phase/delete")
+def admin_delete_phase(phase_id: int = Form(...), db: Session = Depends(get_db)):
+    crud.delete_phase(db, phase_id)
     return RedirectResponse("/admin", status_code=303)
 
 @app.get("/admin/login", response_class=HTMLResponse)

@@ -20,6 +20,11 @@ class MatchType(enum.Enum):
     MD3 = 'MD3'
     MD5 = 'MD5'
 
+class Phase(Base):
+    __tablename__ = 'phases'
+    id = Column(Integer, primary_key=True)
+    name = Column(String, unique=True, nullable=False)
+
 class Match(Base):
     __tablename__ = 'matches'
     id = Column(Integer, primary_key=True)
@@ -28,6 +33,8 @@ class Match(Base):
     scheduled_time = Column(DateTime, nullable=False)
     match_type = Column(Enum(MatchType), nullable=False)
     result = Column(String)  # Ex: '2-1', '1-0', etc
+    phase_id = Column(Integer, ForeignKey('phases.id'), nullable=True)
+    phase = relationship('Phase')
 
 class Bet(Base):
     __tablename__ = 'bets'
