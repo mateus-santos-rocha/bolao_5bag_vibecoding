@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.env
+.venv
+
+# VSCode
+.vscode/
+
+# Banco de dados e segredos
+app/__pycache__/
+database_password.txt
+database_connection_parameters.json
+.env.*
+
+# Sistema
+.DS_Store
+Thumbs.db
+
+# Railway/Heroku/Render
+instance/
+
+# Outros
+*.sqlite3
+*.log
