@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Editar Aposta</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <script>
+    function updateDropdowns() {
+        const matchSelect = document.querySelector('select[name="match_id"]');
+        const team1Label = document.getElementById('team1-label');
+        const team2Label = document.getElementById('team2-label');
+        const team1Dropdown = document.getElementById('team1-score');
+        const team2Dropdown = document.getElementById('team2-score');
+        const matchTypeInput = document.getElementById('match-type');
+        const matches = JSON.parse(document.getElementById('matches-data').textContent);
+        const bets = JSON.parse(document.getElementById('bets-data').textContent);
+        const selectedUser = '{{ selected_user }}';
+        const selected = matches.find(m => m.id == matchSelect.value);
+        if (selected) {
+            team1Label.textContent = selected.team1;
+            team2Label.textContent = selected.team2;
+            matchTypeInput.value = selected.match_type;
+            let maxScore = 1;
+            if (selected.match_type === 'MD1') maxScore = 1;
+            else if (selected.match_type === 'MD3') maxScore = 2;
+            else if (selected.match_type === 'MD5') maxScore = 3;
+            team1Dropdown.innerHTML = '';
+            team2Dropdown.innerHTML = '';
+            for (let i = 0; i <= maxScore; i++) {
+                team1Dropdown.innerHTML += `<option value="${i}">${i}</option>`;
+                team2Dropdown.innerHTML += `<option value="${i}">${i}</option>`;
+            }
+            // Preenche dropdowns com aposta existente
+            const bet = bets.find(b => (b.user_id == selectedUser || b.user_name == selectedUser) && b.match_id == Number(selected.id));
+            if (bet) {
+                const [t1, t2] = bet.prediction.split('-');
+                team1Dropdown.value = t1;
+                team2Dropdown.value = t2;
+                document.getElementById('prediction').value = bet.prediction;
+            } else {
+                team1Dropdown.value = 0;
+                team2Dropdown.value = 0;
+                document.getElementById('prediction').value = '0-0';
+            }
+        }
+    }
+    function setPrediction() {
+        const t1 = document.getElementById('team1-score').value;
+        const t2 = document.getElementById('team2-score').value;
+        document.getElementById('prediction').value = t1 + '-' + t2;
+    }
+    </script>
+</head>
+<body onload="updateDropdowns()">
+    <header>
+        <h1>Bolão 5BAG - Editar Aposta</h1>
+        <nav>
+            <a href="/">Ranking</a>
+            <a href="/matches?user_name={{ selected_user }}">Apostar</a>
+            <a href="/admin">Administração</a>
+        </nav>
+    </header>
+    <div class="container">
+    <h1>Editar Aposta</h1>
+    <h2>Suas apostas já feitas</h2>
+    <table>
+        <tr><th>Partida</th><th>Placar apostado</th></tr>
+        {% for bet in bets %}
+        {% set match = matches | selectattr('id', 'equalto', bet.match_id) | list | first %}
+        <tr {% if bet.match_id|string == request.query_params.get('match_id', '') %}style="background:#ff4fa322;"{% endif %}>
+            <td>{{ match.team1 }} x {{ match.team2 }} ({{ match.match_type }}) - {{ match.scheduled_time_fmt }}</td>
+            <td>{{ bet.prediction }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    {% if error %}
+    <div class="error fadeout" id="error-msg">
+        {{ error }}
+    </div>
+    <script>
+    setTimeout(function() {
+        var el = document.getElementById('error-msg');
+        if (el) {
+            el.style.opacity = 0;
+            setTimeout(function() { el.style.display = 'none'; }, 1000);
+        }
+    }, 5000);
+    </script>
+    {% endif %}
+    <form method="post" action="/edit-bet" onsubmit="setPrediction()">
+        <input type="hidden" name="user_name" value="{{ selected_user }}">
+        <p>Jogador: <b>{{ selected_user }}</b></p>
+        <label>Partida:
+            <select name="match_id" onchange="updateDropdowns(); mostrarApostaAtual();">
+                {% for match in matches %}
+                <option value="{{ match.id }}">{{ match.team1 }} x {{ match.team2 }} ({{ match.match_type }}) - {{ match.scheduled_time_fmt }}</option>
+                {% endfor %}
+            </select>
+        </label><br>
+        <span id="team1-label">Time 1</span>:
+        <select id="team1-score" onchange="setPrediction(); mostrarApostaAtual();"></select>
+        <span id="team2-label">Time 2</span>:
+        <select id="team2-score" onchange="setPrediction(); mostrarApostaAtual();"></select>
+        <input type="hidden" name="prediction" id="prediction" required>
+        <input type="hidden" id="match-type">
+        <div id="aposta-atual" style="margin:10px 0 18px 0; color:#ff4fa3; font-weight:bold;"></div>
+        <script type="application/json" id="matches-data">{{ matches|tojson }}</script>
+        <script type="application/json" id="bets-data">{{ bets|tojson }}</script>
+        <script>
+        function mostrarApostaAtual() {
+            const matchSelect = document.querySelector('select[name="match_id"]');
+            const bets = JSON.parse(document.getElementById('bets-data').textContent);
+            const selectedUser = '{{ selected_user }}';
+            const apostaAtualDiv = document.getElementById('aposta-atual');
+            const bet = bets.find(b => (b.user_id == selectedUser || b.user_name == selectedUser) && b.match_id == Number(matchSelect.value));
+            if (bet) {
+                apostaAtualDiv.innerHTML = `Aposta atual: <span style='color:#fff;'>${bet.prediction}</span>`;
+            } else {
+                apostaAtualDiv.innerHTML = '';
+            }
+        }
+        document.addEventListener('DOMContentLoaded', mostrarApostaAtual);
+        </script>
+        <br>
+        <button type="submit">Editar Aposta</button>
+    </form>
+    <a href="/matches?user_name={{ selected_user }}">Voltar para apostas</a>
+    </div>
+</body>
+</html>

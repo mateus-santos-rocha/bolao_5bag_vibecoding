@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Bolão 5BAG - Admin</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <header>
+        <h1>Bolão 5BAG - Administração</h1>
+        <nav>
+            <a href="/">Ranking</a>
+            <a href="/admin">Administração</a>
+            <a href="/matches?user_name=">Apostar</a>
+        </nav>
+    </header>
+    <div class="container">
+    <h2>Gerenciar Times</h2>
+    <form method="post" action="/admin/team">
+        <label>Novo time: <input type="text" name="team_name" required></label>
+        <button type="submit">Adicionar Time</button>
+    </form>
+    <ul>
+        {% for team in teams %}
+        <li>
+            {{ team.name }}
+            <form method="post" action="/admin/team/edit" style="display:inline; margin-left:10px;">
+                <input type="hidden" name="team_id" value="{{ team.id }}">
+                <input type="text" name="new_name" value="{{ team.name }}" required style="width:120px;">
+                <button type="submit">Salvar</button>
+            </form>
+            <form method="post" action="/admin/team/delete" style="display:inline; margin-left:4px;" onsubmit="return confirm('Tem certeza que deseja remover este time?');">
+                <input type="hidden" name="team_id" value="{{ team.id }}">
+                <button type="submit" style="color:red;">Remover</button>
+            </form>
+        </li>
+        {% endfor %}
+    </ul>
+    <h2>Gerenciar Usuários</h2>
+    <form method="post" action="/admin/user">
+        <label>Novo nome de usuário: <input type="text" name="user_name" required></label>
+        <label>Admin? <input type="checkbox" name="is_admin"></label>
+        <button type="submit">Adicionar Usuário</button>
+    </form>
+    {% if request.query_params.get('error') == 'duplicated' or error %}
+    <div class="error fadeout" id="error-msg">
+        {{ error if error else 'Já existe um usuário com esse nome!' }}
+    </div>
+    <script>
+    setTimeout(function() {
+        var el = document.getElementById('error-msg');
+        if (el) {
+            el.style.opacity = 0;
+            setTimeout(function() { el.style.display = 'none'; }, 1000);
+        }
+    }, 5000);
+    </script>
+    {% endif %}
+    <ul>
+        {% for user in users %}
+        <li>
+            <form method="post" action="/admin/user/edit" style="display:inline;">
+                <input type="hidden" name="user_id" value="{{ user.id }}">
+                <input type="text" name="new_name" value="{{ user.name }}" required>
+                <label>Admin? <input type="checkbox" name="is_admin" {% if user.is_admin %}checked{% endif %}></label>
+                <button type="submit">Salvar</button>
+            </form>
+            <form method="post" action="/admin/user/delete" style="display:inline;" onsubmit="return confirm('Tem certeza que deseja deletar este usuário?');">
+                <input type="hidden" name="user_id" value="{{ user.id }}">
+                <button type="submit" style="color:red;">Deletar</button>
+            </form>
+        </li>
+        {% endfor %}
+    </ul>
+    <h2>Criar nova partida</h2>
+    <form method="post" action="/admin/match">
+        <label>Time 1:
+            <select name="team1" required>
+                <option value="">Selecione</option>
+                {% for team in teams %}
+                <option value="{{ team.name }}">{{ team.name }}</option>
+                {% endfor %}
+            </select>
+        </label><br>
+        <label>Time 2:
+            <select name="team2" required>
+                <option value="">Selecione</option>
+                {% for team in teams %}
+                <option value="{{ team.name }}">{{ team.name }}</option>
+                {% endfor %}
+            </select>
+        </label><br>
+        <label>Data/Hora (dd/mm/aaaa HH:MM:SS): <input type="text" name="scheduled_time" placeholder="ex: 31/12/2025 20:30:00" required></label><br>
+        <label>Tipo:
+            <select name="match_type">
+                <option value="MD1">MD1</option>
+                <option value="MD3">MD3</option>
+                <option value="MD5">MD5</option>
+            </select>
+        </label><br>
+        <button type="submit">Criar Partida</button>
+    </form>
+    <h2>Partidas Existentes</h2>
+    <table border="1">
+        <tr><th>ID</th><th>Times</th><th>Data/Hora</th><th>Tipo</th><th>Resultado</th><th>Definir Resultado</th></tr>
+        {% for match in matches %}
+        <tr>
+            <td>{{ match.id }}</td>
+            <td>{{ match.team1 }} x {{ match.team2 }}</td>
+            <td>{{ match.scheduled_time_fmt }}</td>
+            <td>{{ match.match_type.value }}</td>
+            <td>{{ match.result or '-' }}</td>
+            <td>
+                <form method="post" action="/admin/result">
+                    <input type="hidden" name="match_id" value="{{ match.id }}">
+                    <input type="text" name="result" placeholder="ex: 2-1">
+                    <button type="submit">Salvar</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+    <h2>Configurar Pontuação</h2>
+    <form method="post" action="/admin/points">
+        <label>MD1: <input type="number" name="md1" value="{{ points['MD1'] }}"></label><br>
+        <label>MD3 (vencedor): <input type="number" name="md3_winner" value="{{ points['MD3_WINNER'] }}"></label><br>
+        <label>MD3 (placar): <input type="number" name="md3_score" value="{{ points['MD3_SCORE'] }}"></label><br>
+        <label>MD5 (vencedor): <input type="number" name="md5_winner" value="{{ points['MD5_WINNER'] }}"></label><br>
+        <label>MD5 (placar): <input type="number" name="md5_score" value="{{ points['MD5_SCORE'] }}"></label><br>
+        <button type="submit">Salvar Pontuação</button>
+    </form>
+    <h2>Gerenciar Fases da Competição</h2>
+    <form method="post" action="/admin/phase">
+        <label>Nova fase: <input type="text" name="phase_name" required></label>
+        <button type="submit">Adicionar Fase</button>
+    </form>
+    <ul>
+        {% if phases %}
+            {% for phase in phases %}
+            <li>{{ phase.name }}</li>
+            {% endfor %}
+        {% else %}
+            <li style="color:#aaa;">Nenhuma fase cadastrada ainda.</li>
+        {% endif %}
+    </ul>
+    <a href="/">Voltar ao ranking</a>
+    </div>
+</body>
+</html>

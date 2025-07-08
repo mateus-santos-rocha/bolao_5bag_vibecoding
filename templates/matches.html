@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Bolão 5BAG - Partidas</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <script>
+    let selectedUser = '{{ selected_user|default("") }}';
+    function updateDropdowns() {
+        const matchSelect = document.querySelector('select[name="match_id"]');
+        const team1Label = document.getElementById('team1-label');
+        const team2Label = document.getElementById('team2-label');
+        const team1Dropdown = document.getElementById('team1-score');
+        const team2Dropdown = document.getElementById('team2-score');
+        const matchTypeInput = document.getElementById('match-type');
+        const matches = JSON.parse(document.getElementById('matches-data').textContent);
+        const bets = JSON.parse(document.getElementById('bets-data').textContent);
+        // Filtra partidas já apostadas
+        let availableMatches = matches;
+        if (selectedUser) {
+            const apostadas = bets.filter(b => b.user_name === selectedUser).map(b => b.match_id);
+            availableMatches = matches.filter(m => apostadas.indexOf(m.id) === -1);
+        }
+        matchSelect.innerHTML = '';
+        for (const m of availableMatches) {
+            matchSelect.innerHTML += `<option value="${m.id}">${m.team1} x ${m.team2} (${m.match_type}) - ${m.scheduled_time_fmt}</option>`;
+        }
+        const selected = availableMatches.length ? availableMatches[0] : null;
+        if (selected) {
+            team1Label.textContent = selected.team1;
+            team2Label.textContent = selected.team2;
+            matchTypeInput.value = selected.match_type;
+            let maxScore = 1;
+            if (selected.match_type === 'MD3') maxScore = 2;
+            if (selected.match_type === 'MD5') maxScore = 3;
+            team1Dropdown.innerHTML = '';
+            team2Dropdown.innerHTML = '';
+            for (let i = 0; i <= maxScore; i++) {
+                team1Dropdown.innerHTML += `<option value="${i}">${i}</option>`;
+                team2Dropdown.innerHTML += `<option value="${i}">${i}</option>`;
+            }
+        } else {
+            team1Label.textContent = 'Time 1';
+            team2Label.textContent = 'Time 2';
+            team1Dropdown.innerHTML = '';
+            team2Dropdown.innerHTML = '';
+        }
+    }
+    function setPrediction() {
+        const t1 = document.getElementById('team1-score').value;
+        const t2 = document.getElementById('team2-score').value;
+        document.getElementById('prediction').value = t1 + '-' + t2;
+    }
+    </script>
+</head>
+<body onload="updateDropdowns()">
+    <header>
+        <h1>Bolão 5BAG - Partidas para Apostar</h1>
+        <nav>
+            <a href="/">Ranking</a>
+            <a href="/matches?user_name={{ selected_user }}">Apostar</a>
+            <a href="/admin">Administração</a>
+        </nav>
+    </header>
+    <div class="container">
+    <div><b>Jogador:</b> {{ selected_user }}</div>
+    {% if error %}
+    <div class="error" style="background:#ff4fa3;color:#fff;padding:10px 0 10px 0;margin-bottom:18px;text-align:center;border-radius:6px;font-weight:bold;">
+        {{ error }}
+    </div>
+    {% endif %}
+    <form method="post" action="/bet" onsubmit="setPrediction()">
+        <input type="hidden" name="user_name" value="{{ selected_user }}">
+        <label>Partida:
+            <select name="match_id"></select>
+        </label><br>
+        <span id="team1-label">Time 1</span>:
+        <select id="team1-score" onchange="setPrediction()"></select>
+        <span id="team2-label">Time 2</span>:
+        <select id="team2-score" onchange="setPrediction()"></select>
+        <input type="hidden" name="prediction" id="prediction" required>
+        <input type="hidden" id="match-type">
+        <script type="application/json" id="matches-data">{{ matches|tojson }}</script>
+        <script type="application/json" id="bets-data">{{ bets|tojson }}</script>
+        <br>
+        <button type="submit">Apostar</button>
+    </form>
+    <a href="/edit-bet?user_name={{ selected_user }}">Editar apostas já feitas</a>
+    <br>
+    <h2>Visualizar apostas já feitas</h2>
+    <table>
+        <tr><th>Partida</th><th>Palpite</th><th>Data/Hora do Palpite</th></tr>
+        {% for bet in bets if bet.user_name == selected_user %}
+        {% set match = matches | selectattr('id', 'equalto', bet.match_id) | list | first %}
+        <tr>
+            <td>{{ match.team1 }} x {{ match.team2 }} ({{ match.match_type }}) - {{ match.scheduled_time_fmt }}</td>
+            <td>{{ bet.prediction }}</td>
+            <td>{{ bet.timestamp | default('-') }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    <a href="/">Voltar ao ranking</a>
+    </div>
+</body>
+</html>

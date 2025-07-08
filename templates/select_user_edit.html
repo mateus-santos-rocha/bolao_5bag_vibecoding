@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Selecionar Usuário para Editar Aposta</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <h1>Editar Aposta - Selecione o Jogador</h1>
+    <form method="get" action="/edit-bet">
+        <label>Seu nome:
+            <select name="user_name" required>
+                <option value="">Selecione</option>
+                {% for user in users %}
+                <option value="{{ user.name }}">{{ user.name }}</option>
+                {% endfor %}
+            </select>
+        </label>
+        <button type="submit">Continuar</button>
+    </form>
+    <a href="/matches">Voltar para apostas</a>
+</body>
+</html>

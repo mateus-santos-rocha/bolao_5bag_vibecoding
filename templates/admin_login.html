@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Login Admin - Bolão 5BAG</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="container" style="max-width:400px;margin-top:80px;">
+        <h2>Login de Administrador</h2>
+        {% if error %}
+        <div class="error fadeout" id="error-msg">{{ error }}</div>
+        <script>
+        setTimeout(function() {
+            var el = document.getElementById('error-msg');
+            if (el) {
+                el.style.opacity = 0;
+                setTimeout(function() { el.style.display = 'none'; }, 1000);
+            }
+        }, 5000);
+        </script>
+        {% endif %}
+        <form method="post" action="/admin/login">
+            <label>Usuário: <input type="text" name="user_name" required></label><br>
+            <label>Senha: <input type="password" name="password" required></label><br>
+            <button type="submit">Entrar</button>
+        </form>
+    </div>
+</body>
+</html>
