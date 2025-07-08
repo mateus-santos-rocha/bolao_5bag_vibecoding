@@ -10,6 +10,7 @@ from datetime import datetime, timedelta
 from fastapi.staticfiles import StaticFiles
 import json
 from hashlib import sha256
+from sqlalchemy import text
 
 models.Base.metadata.create_all(bind=engine)
 
@@ -378,3 +379,9 @@ async def admin_protect_middleware(request: Request, call_next):
             return RedirectResponse("/admin/login")
     response = await call_next(request)
     return response
+
+@app.get("/debug/tabelas")
+def debug_list_tables(db: Session = Depends(get_db)):
+    result = db.execute(text("SELECT table_name FROM information_schema.tables WHERE table_schema = 'public';"))
+    tables = [row[0] for row in result]
+    return {"tables": tables}
