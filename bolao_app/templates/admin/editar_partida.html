@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h2>Editar Partida</h2>
+
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <ul class=flashes>
+        {% for message in messages %}
+          <li>{{ message }}</li>
+        {% endfor %}
+        </ul>
+      {% endif %}
+    {% endwith %}
+
+    <form method="POST" action="{{ url_for('editar_partida', partida_id=partida.id) }}">
+        <div>
+            <label for="time1_id">Time 1</label>
+            <select id="time1_id" name="time1_id" required>
+                {% for time in times %}
+                    <option value="{{ time.id }}" {% if time.id == partida.time1_id %}selected{% endif %}>{{ time.nome }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div>
+            <label for="time2_id">Time 2</label>
+            <select id="time2_id" name="time2_id" required>
+                {% for time in times %}
+                    <option value="{{ time.id }}" {% if time.id == partida.time2_id %}selected{% endif %}>{{ time.nome }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div>
+            <label for="match_type">Formato</label>
+            <select id="match_type" name="match_type" onchange="toggleScoreFields()">
+                <option value="MD1" {% if partida.match_type == 'MD1' %}selected{% endif %}>MD1</option>
+                <option value="MD3" {% if partida.match_type == 'MD3' %}selected{% endif %}>MD3</option>
+                <option value="MD5" {% if partida.match_type == 'MD5' %}selected{% endif %}>MD5</option>
+            </select>
+        </div>
+        <div>
+            <label for="data_partida">Data e Hora</label>
+            <input type="datetime-local" id="data_partida" name="data_partida" value="{{ partida.data_partida.strftime('%Y-%m-%dT%H:%M') }}" required>
+        </div>
+        
+        <hr>
+
+        <div id="score_fields" style="display: none;">
+            <h3>Placar Final</h3>
+            <div>
+                <label for="score_time1">{{ partida.time1.nome }}</label>
+                <input type="number" id="score_time1" name="score_time1" value="{{ partida.score_time1 if partida.score_time1 is not none else '' }}" min="0">
+            </div>
+            <div>
+                <label for="score_time2">{{ partida.time2.nome }}</label>
+                <input type="number" id="score_time2" name="score_time2" value="{{ partida.score_time2 if partida.score_time2 is not none else '' }}" min="0">
+            </div>
+        </div>
+
+        <div>
+            <label for="resultado">Resultado Oficial (Vencedor)</label>
+            <select id="resultado" name="resultado">
+                <option value="">Aguardando Resultado</option>
+                <option value="{{ partida.time1.nome }}" {% if partida.resultado == partida.time1.nome %}selected{% endif %}>{{ partida.time1.nome }}</option>
+                <option value="{{ partida.time2.nome }}" {% if partida.resultado == partida.time2.nome %}selected{% endif %}>{{ partida.time2.nome }}</option>
+            </select>
+        </div>
+
+        <button type="submit">Salvar Alterações</button>
+    </form>
+
+    <script>
+        function toggleScoreFields() {
+            var matchType = document.getElementById('match_type').value;
+            var scoreFields = document.getElementById('score_fields');
+            var resultadoDropdown = document.getElementById('resultado');
+
+            if (matchType === 'MD3' || matchType === 'MD5') {
+                scoreFields.style.display = 'block';
+                resultadoDropdown.disabled = true; // Desabilita o dropdown de resultado
+                resultadoDropdown.value = ""; // Limpa o valor selecionado
+            } else {
+                scoreFields.style.display = 'none';
+                resultadoDropdown.disabled = false; // Habilita o dropdown de resultado
+            }
+        }
+
+        // Chama a função ao carregar a página para definir o estado inicial
+        document.addEventListener('DOMContentLoaded', toggleScoreFields);
+    </script>
+{% endblock %}

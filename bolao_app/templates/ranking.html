@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h2>Ranking</h2>
+
+    {% if ranking %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Posição</th>
+                    <th>Usuário</th>
+                    <th>Pontos</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for entry in ranking %}
+                    <tr>
+                        <td>{{ loop.index }}</td>
+                        <td>{{ entry.username }}</td>
+                        <td>{{ entry.pontos }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>Nenhum dado de ranking disponível ainda.</p>
+    {% endif %}
+{% endblock %}

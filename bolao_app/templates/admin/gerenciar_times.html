@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h2>Gerenciar Times</h2>
+
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <ul class=flashes>
+        {% for message in messages %}
+          <li>{{ message }}</li>
+        {% endfor %}
+        </ul>
+      {% endif %}
+    {% endwith %}
+
+    <h3>Adicionar Novo Time</h3>
+    <form method="POST" action="{{ url_for('adicionar_time') }}">
+        <div>
+            <label for="nome">Nome do Time</label>
+            <input type="text" id="nome" name="nome" required>
+        </div>
+        <div>
+            <label for="liga">Liga</label>
+            <select id="liga" name="liga">
+                <option value="LCK">LCK</option>
+                <option value="LPL">LPL</option>
+                <option value="LEC">LEC</option>
+                <option value="LTA South">LTA South</option>
+                <option value="LTA North">LTA North</option>
+                <option value="LCP">LCP</option>
+            </select>
+        </div>
+        <button type="submit">Adicionar Time</button>
+    </form>
+
+    <hr>
+
+    <h3>Times Cadastrados</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Nome</th>
+                <th>Liga</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for time in times %}
+                <tr>
+                    <td>{{ time.nome }}</td>
+                    <td>{{ time.liga }}</td>
+                    <td>
+                        <a href="#">Editar</a>
+                        <form action="{{ url_for('deletar_time', time_id=time.id) }}" method="POST" style="display:inline;">
+                            <button type="submit" onclick="return confirm('Tem certeza que deseja deletar este time? Todas as partidas e apostas relacionadas a ele serão afetadas.');">Deletar</button>
+                        </form>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

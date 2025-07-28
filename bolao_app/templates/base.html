@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bolão 5BAG - Worlds 2025</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <header>
+        <h1>Bolão 5BAG - Worlds 2025</h1>
+        <nav>
+            <ul>
+                <li><a href="{{ url_for('index') }}">Página Inicial</a></li>
+                <li><a href="{{ url_for('apostar') }}">Apostar</a></li>
+                {% if current_user.is_authenticated %}
+                    <li><a href="{{ url_for('minhas_apostas') }}">Minhas Apostas</a></li>
+                    <li><a href="{{ url_for('ranking') }}">Ranking</a></li>
+                    <li><a href="{{ url_for('mudar_senha') }}">Mudar Senha</a></li>
+                    <li><a href="{{ url_for('logout') }}">Logout ({{ current_user.username }})</a></li>
+                    {% if current_user.is_admin %}
+                        <li><a href="{{ url_for('admin_dashboard') }}">Admin</a></li>
+                        <li><a href="{{ url_for('gerenciar_solicitacoes_apostas') }}">Solicitações de Apostas</a></li>
+                    {% endif %}
+                {% else %}
+                    <li><a href="{{ url_for('login') }}">Login</a></li>
+                    <li><a href="{{ url_for('register') }}">Registrar</a></li>
+                {% endif %}
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <div class="container">
+            {% block content %}
+            {% endblock %}
+        </div>
+    </main>
+    <footer>
+        <p>&copy; 2025 - 5BAG</p>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h2>Dashboard do Admin</h2>
+    <p>Bem-vindo, {{ current_user.username }}.</p>
+    <ul>
+        <li><a href="{{ url_for('gerenciar_times') }}">Gerenciar Times</a></li>
+        <li><a href="{{ url_for('gerenciar_partidas') }}">Gerenciar Partidas</a></li>
+        <li><a href="{{ url_for('gerenciar_usuarios') }}">Gerenciar Usuários</a></li>
+        <li><a href="{{ url_for('gerenciar_apostas') }}">Gerenciar Apostas</a></li>
+        <li><a href="{{ url_for('gerenciar_solicitacoes_apostas') }}">Gerenciar Solicitações de Apostas</a></li>
+    </ul>
+{% endblock %}

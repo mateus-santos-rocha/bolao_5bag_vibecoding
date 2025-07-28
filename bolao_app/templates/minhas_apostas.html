@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h2>Minhas Apostas</h2>
+
+    {% if apostas %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Partida</th>
+                    <th>Meu Palpite</th>
+                    <th>Resultado Oficial</th>
+                    <th>Status</th>
+                    <th>Pontos Ganhos</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for aposta in apostas %}
+                    <tr>
+                        <td>{{ aposta.aposta.partida.time1.nome }} vs {{ aposta.aposta.partida.time2.nome }} ({{ aposta.aposta.partida.match_type }})</td>
+                        <td>{{ aposta.aposta.palpite_vencedor }}</td>
+                        <td>
+                            {% if aposta.aposta.partida.resultado %}
+                                {{ aposta.aposta.partida.resultado }}
+                            {% else %}
+                                Aguardando
+                            {% endif %}
+                        </td>
+                        <td>{{ aposta.status }}</td>
+                        <td>{{ aposta.pontos_ganhos }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>Você ainda não fez nenhuma aposta.</p>
+    {% endif %}
+{% endblock %}

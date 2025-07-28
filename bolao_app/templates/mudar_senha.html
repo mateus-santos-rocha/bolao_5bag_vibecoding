@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h2>Mudar Senha</h2>
+
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <ul class=flashes>
+        {% for message in messages %}
+          <li>{{ message }}</li>
+        {% endfor %}
+        </ul>
+      {% endif %}
+    {% endwith %}
+
+    <form method="POST" action="{{ url_for('mudar_senha') }}">
+        <div>
+            <label for="current_password">Senha Atual</label>
+            <input type="password" id="current_password" name="current_password" required>
+        </div>
+        <div>
+            <label for="new_password">Nova Senha</label>
+            <input type="password" id="new_password" name="new_password" required>
+        </div>
+        <div>
+            <label for="confirm_new_password">Confirmar Nova Senha</label>
+            <input type="password" id="confirm_new_password" name="confirm_new_password" required>
+        </div>
+        <button type="submit">Mudar Senha</button>
+    </form>
+{% endblock %}

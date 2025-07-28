@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h2 class="text-center">Bem-vindo ao BOLÃO 5BAG - Worlds 2025!</h2>
+    <p class="text-center">Aposte nas partidas do Mundial de LoL e mostre que você é o maior conhecedor!</p>
+
+    <h3 class="mt-20">Próximas Partidas</h3>
+    {% if proximas_partidas %}
+        {% for partida in proximas_partidas %}
+            <div style="border: 1px solid var(--border-color); padding: 15px; margin-bottom: 15px; border-radius: 8px; background-color: var(--bg-light);">
+                <h4>{{ partida.time1.nome }} <span style="color: var(--primary-color);">vs</span> {{ partida.time2.nome }} ({{ partida.match_type }})</h4>
+                <p>Data: {{ partida.data_partida.strftime('%d/%m/%Y %H:%M') }}</p>
+            </div>
+        {% endfor %}
+        <p class="text-center mt-20">
+            <a href="{{ url_for('apostar') }}" class="admin-actions a">Apostar em todas as partidas</a>
+        </p>
+    {% else %}
+        <p class="text-center">Não há próximas partidas disponíveis para aposta no momento.</p>
+    {% endif %}
+{% endblock %}

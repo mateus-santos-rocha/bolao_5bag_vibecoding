@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h2>Apostar</h2>
+
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <ul class=flashes>
+        {% for message in messages %}
+          <li>{{ message }}</li>
+        {% endfor %}
+        </ul>
+      {% endif %}
+    {% endwith %}
+
+    {% if partidas_para_exibir %}
+        {% for item in partidas_para_exibir %}
+            {% set partida = item.partida %}
+            {% set ja_apostou = item.ja_apostou %}
+            {% set partida_iniciada = item.partida_iniciada %}
+
+            <div style="border: 1px solid var(--border-color); padding: 15px; margin-bottom: 15px; border-radius: 8px; background-color: var(--bg-light);">
+                <h3>{{ partida.time1.nome }} vs {{ partida.time2.nome }} ({{ partida.match_type }})</h3>
+                <p>Data: {{ partida.data_partida.strftime('%d/%m/%Y %H:%M') }}</p>
+                
+                {% if ja_apostou %}
+                    <p style="color: var(--primary-color); font-weight: bold;">Você já apostou nesta partida!</p>
+                {% elif partida_iniciada %}
+                    <h4>Solicitar Aposta Tardia</h4>
+                    <form method="POST" action="{{ url_for('solicitar_aposta_tardia') }}">
+                        <input type="hidden" name="partida_id" value="{{ partida.id }}">
+
+                        {% if partida.match_type == 'MD1' %}
+                            <label for="palpite_vencedor_tardia_{{ partida.id }}">Meu Palpite:</label>
+                            <select id="palpite_vencedor_tardia_{{ partida.id }}" name="palpite_vencedor" required>
+                                <option value="{{ partida.time1.nome }}">{{ partida.time1.nome }}</option>
+                                <option value="{{ partida.time2.nome }}">{{ partida.time2.nome }}</option>
+                            </select>
+                        {% else %}
+                            <label>Meu Palpite (Placar):</label>
+                            <div>
+                                <input type="number" name="score_time1" placeholder="{{ partida.time1.nome }}" min="0" required>
+                                <span> - </span>
+                                <input type="number" name="score_time2" placeholder="{{ partida.time2.nome }}" min="0" required>
+                            </div>
+                        {% endif %}
+
+                        <button type="submit">Solicitar Aposta Tardia</button>
+                    </form>
+                {% else %}
+                    <form method="POST" action="{{ url_for('apostar') }}">
+                        <input type="hidden" name="partida_id" value="{{ partida.id }}">
+
+                        {% if partida.match_type == 'MD1' %}
+                            <label for="palpite_vencedor_{{ partida.id }}">Meu Palpite:</label>
+                            <select id="palpite_vencedor_{{ partida.id }}" name="palpite_vencedor" required>
+                                <option value="{{ partida.time1.nome }}">{{ partida.time1.nome }}</option>
+                                <option value="{{ partida.time2.nome }}">{{ partida.time2.nome }}</option>
+                            </select>
+                        {% else %}
+                            <label>Meu Palpite (Placar):</label>
+                            <div>
+                                <input type="number" name="score_time1" placeholder="{{ partida.time1.nome }}" min="0" required>
+                                <span> - </span>
+                                <input type="number" name="score_time2" placeholder="{{ partida.time2.nome }}" min="0" required>
+                            </div>
+                        {% endif %}
+
+                        <button type="submit">Apostar</button>
+                    </form>
+                {% endif %}
+            </div>
+        {% endfor %}
+    {% else %}
+        <p>Não há partidas disponíveis para apostar no momento.</p>
+    {% endif %}
+{% endblock %}

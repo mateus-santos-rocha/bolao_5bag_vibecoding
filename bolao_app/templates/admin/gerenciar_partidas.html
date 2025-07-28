@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h2>Gerenciar Partidas</h2>
+
+    <h3>Adicionar Nova Partida</h3>
+    <form method="POST" action="{{ url_for('adicionar_partida') }}">
+        <div>
+            <label for="time1_id">Time 1</label>
+            <select id="time1_id" name="time1_id" required>
+                {% for time in times %}
+                    <option value="{{ time.id }}">{{ time.nome }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div>
+            <label for="time2_id">Time 2</label>
+            <select id="time2_id" name="time2_id" required>
+                {% for time in times %}
+                    <option value="{{ time.id }}">{{ time.nome }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div>
+            <label for="match_type">Formato</label>
+            <select id="match_type" name="match_type">
+                <option value="MD1">MD1</option>
+                <option value="MD3">MD3</option>
+                <option value="MD5">MD5</option>
+            </select>
+        </div>
+        <div>
+            <label for="data_partida">Data e Hora</label>
+            <input type="datetime-local" id="data_partida" name="data_partida" required>
+        </div>
+        <button type="submit">Adicionar Partida</button>
+    </form>
+
+    <hr>
+
+    <h3>Partidas Existentes</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Time 1</th>
+                <th>Time 2</th>
+                <th>Formato</th>
+                <th>Data</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for partida in partidas %}
+                <tr>
+                    <td>{{ partida.time1.nome }}</td>
+                    <td>{{ partida.time2.nome }}</td>
+                    <td>{{ partida.match_type }}</td>
+                    <td>{{ partida.data_partida.strftime('%d/%m/%Y %H:%M') }}</td>
+                    <td>
+                        <a href="{{ url_for('editar_partida', partida_id=partida.id) }}">Editar</a>
+                        <form action="{{ url_for('deletar_partida', partida_id=partida.id) }}" method="POST" style="display:inline;">
+                            <button type="submit" onclick="return confirm('Tem certeza que deseja deletar esta partida e todas as apostas relacionadas?');">Deletar</button>
+                        </form>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h2>Editar Usuário: {{ user.username }}</h2>
+
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <ul class=flashes>
+        {% for message in messages %}
+          <li>{{ message }}</li>
+        {% endfor %}
+        </ul>
+      {% endif %}
+    {% endwith %}
+
+    <form method="POST" action="{{ url_for('editar_usuario', user_id=user.id) }}">
+        <div>
+            <label for="username">Nome de Usuário</label>
+            <input type="text" id="username" name="username" value="{{ user.username }}" required>
+        </div>
+        <div>
+            <label for="is_admin">É Administrador?</label>
+            <input type="checkbox" id="is_admin" name="is_admin" {% if user.is_admin %}checked{% endif %}>
+        </div>
+        <button type="submit">Salvar Alterações</button>
+    </form>
+
+    <form method="POST" action="{{ url_for('redefinir_senha_usuario', user_id=user.id) }}" style="margin-top: 20px;">
+        <button type="submit" onclick="return confirm('Tem certeza que deseja redefinir a senha deste usuário? Uma nova senha temporária será gerada.');">Redefinir Senha</button>
+    </form>
+{% endblock %}

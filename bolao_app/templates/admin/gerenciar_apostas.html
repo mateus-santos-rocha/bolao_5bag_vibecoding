@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h2>Gerenciar Apostas</h2>
+
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <ul class=flashes>
+        {% for message in messages %}
+          <li>{{ message }}</li>
+        {% endfor %}
+        </ul>
+      {% endif %}
+    {% endwith %}
+
+    {% if apostas %}
+        <table>
+            <thead>
+                <tr>
+                    <th>ID Aposta</th>
+                    <th>Usuário</th>
+                    <th>Partida</th>
+                    <th>Palpite</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for aposta in apostas %}
+                    <tr>
+                        <td>{{ aposta.id }}</td>
+                        <td>{{ aposta.apostador.username }}</td>
+                        <td>{{ aposta.partida.time1.nome }} vs {{ aposta.partida.time2.nome }} ({{ aposta.partida.match_type }})</td>
+                        <td>{{ aposta.palpite_vencedor }}</td>
+                        <td>
+                            <form action="{{ url_for('deletar_aposta', aposta_id=aposta.id) }}" method="POST" style="display:inline;">
+                                <button type="submit" onclick="return confirm('Tem certeza que deseja deletar esta aposta?');">Deletar</button>
+                            </form>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>Nenhuma aposta registrada ainda.</p>
+    {% endif %}
+{% endblock %}

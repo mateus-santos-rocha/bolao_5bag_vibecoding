@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h2>Gerenciar Solicitações de Apostas Tardias</h2>
+
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <ul class=flashes>
+        {% for message in messages %}
+          <li>{{ message }}</li>
+        {% endfor %}
+        </ul>
+      {% endif %}
+    {% endwith %}
+
+    {% if solicitacoes %}
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Usuário</th>
+                    <th>Partida</th>
+                    <th>Palpite</th>
+                    <th>Data da Solicitação</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for solicitacao in solicitacoes %}
+                    <tr>
+                        <td>{{ solicitacao.id }}</td>
+                        <td>{{ solicitacao.user.username }}</td>
+                        <td>{{ solicitacao.partida.time1.nome }} vs {{ solicitacao.partida.time2.nome }}</td>
+                        <td>{{ solicitacao.palpite_vencedor }}</td>
+                        <td>{{ solicitacao.timestamp.strftime('%d/%m/%Y %H:%M') }}</td>
+                        <td>
+                            <form method="POST" action="{{ url_for('aprovar_solicitacao_aposta', solicitacao_id=solicitacao.id) }}" style="display:inline;">
+                                <button type="submit" class="admin-actions">Aprovar</button>
+                            </form>
+                            <form method="POST" action="{{ url_for('rejeitar_solicitacao_aposta', solicitacao_id=solicitacao.id) }}" style="display:inline;">
+                                <button type="submit" class="admin-actions delete">Rejeitar</button>
+                            </form>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>Não há solicitações de apostas tardias pendentes no momento.</p>
+    {% endif %}
+{% endblock %}
